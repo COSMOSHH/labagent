@@ -594,7 +594,7 @@ class LabAgentApp(App):
         self.file_cache = FileCache()
         self.client: LLMClient | None = None
         self.conversation = ConversationManager()
-        self.registry: ToolRegistry = create_default_registry(file_cache=self.file_cache)
+        self.registry: ToolRegistry = create_default_registry(file_cache=self.file_cache, work_dir=work_dir)
         self.agent: Agent | None = None
         self.mcp_manager: MCPManager | None = None
         self._mcp_init_task: asyncio.Task[None] | None = None

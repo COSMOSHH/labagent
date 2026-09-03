@@ -137,7 +137,7 @@ class ToolRegistry:
         return schemas
 
 
-def create_default_registry(file_cache: FileCache | None = None, file_history: Any = None) -> ToolRegistry:
+def create_default_registry(file_cache: FileCache | None = None, file_history: Any = None, work_dir: str | None = None) -> ToolRegistry:
     from labagent.tools.bash import Bash
     from labagent.tools.edit_file import EditFile
     from labagent.tools.file_state_cache import FileStateCache
@@ -155,4 +155,7 @@ def create_default_registry(file_cache: FileCache | None = None, file_history: A
     registry.register(Bash())
     registry.register(Glob())
     registry.register(Grep())
+    if work_dir is not None:
+        from labagent.tools.experiment_run import ExperimentRun
+        registry.register(ExperimentRun(work_dir))
     return registry

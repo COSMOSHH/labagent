@@ -102,6 +102,33 @@ labagent -p "总结 README.md" --output-format stream-json
 
 `stream-json` 会输出 NDJSON 事件，适合 CI 或脚本集成。
 
+## 实验 Workflow MVP
+
+LabAgent 支持在实验仓库内保存和复用仓库专属的检测实验流程。首次使用时进入实验仓库根目录启动 LabAgent：
+
+```powershell
+cd F:\desktop\labagent\YOLO26-RGBT
+labagent
+```
+
+当前仓库的流程位于 `.labagent/workflows/`，仓库级实验 Skill 位于 `.labagent/skills/experiment/SKILL.md`。不同仓库分别维护自己的流程，不会读取或复用其他仓库的实验配置。
+
+在对话中可以要求 Agent：
+
+```text
+列出当前仓库的实验流程
+查看 rgbt-baseline 的状态
+初始化一个新的实验流程，入口是 run.py，固定参数是……，允许修改 epochs 和 batch……
+运行 rgbt-baseline 的 smoke test
+运行 rgbt-baseline，变量 epochs=200、batch=32
+```
+
+Agent 会通过 `ExperimentRun` 工具执行 `init`、`list`、`status` 和 `run` 操作。初始化产生的流程始终是 `draft`；人类确认 YAML、入口、参数白名单和 Smoke Test 方式后，再将 `status` 改为 `active`。每次运行会在实验仓库的 `experiments/runs/<experiment-id>/` 保存配置快照、实际命令、日志和元数据。
+
+固定流程写入 Workflow，Skill 只负责交互和调用，Hook 暂不存储流程。当前 MVP 不接受 Agent 直接拼接任意训练 shell；如果原训练脚本没有 CLI 参数，需要先提供人类确认的仓库内薄适配器，才能安全开放 epochs、batch 等 Smoke Test 或实验变量。
+
+首个适配对象是 `YOLO26-RGBT` 的 `my_train_RGBT.py`。该脚本当前参数硬编码，因此仓库中的 `rgbt-baseline.yaml` 默认保持 `draft`，尚未声称已完成真实 Smoke Test；确认适配器和 GPU 环境后再激活。
+
 远程模式：
 
 ```powershell
